@@ -1,14 +1,45 @@
 {
   "name": "onside",
+  "version": "0.0.1",
+  "description": "football, prediction, and analytics platform",
+  "author": "Ime Samuel",
   "private": true,
-  "packageManager": "pnpm@9.15.0",
-  "scripts": {
-    "dev": "pnpm --filter @onside/api start:dev",
-    "build": "pnpm --filter @onside/api build",
-    "lint": "pnpm --filter @onside/api lint",
-    "test": "pnpm --filter @onside/api test"
+  "license": "UNLICENSED",
+    "scripts": {
+    "build": "prisma generate && nest build",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/src/main.js",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "prisma:seed": "ts-node prisma/seed.ts"
   },
   "devDependencies": {
     "typescript": "^5.7.3"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
+  },
+    "engines": {
+    "node": ">=20"
   }
 }
