@@ -1,0 +1,14 @@
+{
+  "name": "onside",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm --filter @onside/api start:dev",
+    "build": "pnpm --filter @onside/api build",
+    "lint": "pnpm --filter @onside/api lint",
+    "test": "pnpm --filter @onside/api test"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

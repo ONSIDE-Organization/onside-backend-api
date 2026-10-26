@@ -1,0 +1,1 @@
+export interface RivalryResponseDto { /* TODO: define response contract */ }

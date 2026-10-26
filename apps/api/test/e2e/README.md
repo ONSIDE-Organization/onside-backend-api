@@ -1,0 +1,1 @@
+E2E tests and supporting files belong here.

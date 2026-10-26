@@ -1,0 +1,1 @@
+Shared lint rules package placeholder. Wire into the workspace ESLint configuration when lint policy is finalized.

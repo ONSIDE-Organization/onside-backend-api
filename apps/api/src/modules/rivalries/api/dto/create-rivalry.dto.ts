@@ -1,0 +1,1 @@
+export interface CreateRivalryDto { /* TODO: define request contract */ }

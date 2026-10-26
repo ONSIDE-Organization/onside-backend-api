@@ -1,0 +1,1 @@
+Bounded context: auth. Keep HTTP/API, application use-cases, domain rules, and infrastructure adapters separated.

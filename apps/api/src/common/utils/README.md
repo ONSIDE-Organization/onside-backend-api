@@ -1,0 +1,1 @@
+Date, ID, pagination, and other pure utility functions.

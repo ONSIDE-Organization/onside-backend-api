@@ -1,0 +1,1 @@
+export interface ListRivalriesQuery { /* TODO: define query contract */ }

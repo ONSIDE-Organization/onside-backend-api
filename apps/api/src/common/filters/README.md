@@ -1,0 +1,1 @@
+Global exception handling and Prisma-to-HTTP error mapping.

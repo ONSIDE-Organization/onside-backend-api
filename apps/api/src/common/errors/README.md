@@ -1,0 +1,1 @@
+DomainError base class and application error codes.

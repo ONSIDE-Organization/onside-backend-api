@@ -1,0 +1,1 @@
+Outbound infrastructure adapters. Keep provider-specific code out of domain modules.

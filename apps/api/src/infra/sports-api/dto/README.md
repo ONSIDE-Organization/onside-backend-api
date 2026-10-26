@@ -1,0 +1,1 @@
+Provider-specific DTOs belong here; map them before they enter the domain.

@@ -1,0 +1,1 @@
+Railway service and release-command configuration goes here. Run database migrations as a separate release step, not in main.ts.
