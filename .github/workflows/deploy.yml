@@ -5,4 +5,4 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "TODO: configure Railway deployment after environment and secrets are set"
+      - run: 'echo "TODO: configure Railway deployment after environment and secrets are set"'

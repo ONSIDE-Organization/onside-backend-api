@@ -1,4 +1,4 @@
-import { Controller, Get, Logger } from '@nestjs/common';
+import { Controller, Get, Logger, VERSION_NEUTRAL } from '@nestjs/common';
 import {
   HealthCheck,
   HealthCheckService,
@@ -24,7 +24,11 @@ import { PrismaHealthIndicator } from '../../infra/prisma/prisma.health';
  */
 @ApiExcludeController()
 @Public()
-@Controller('health')
+//@Controller('health')
+@Controller({
+  path: 'health',
+  version: VERSION_NEUTRAL,
+})
 export class HealthController {
   private readonly logger = new Logger(HealthController.name);
 
