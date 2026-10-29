@@ -5,4 +5,4 @@ jobs:
   migrate:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "TODO: configure protected production migration job and secrets"
+      - run: 'echo "TODO: configure protected production migration job and secrets"'

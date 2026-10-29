@@ -41,6 +41,7 @@ export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
     .addTag('Users', 'Profile, stats, badges, receipts')
     .addTag('Health', 'Railway liveness/readiness probes')
     .addServer('http://localhost:3000', 'Local')
+    .addServer('https://onsideapi-staging.up.railway.app', 'Staging')
     .build();
 
   return SwaggerModule.createDocument(app, config, {
