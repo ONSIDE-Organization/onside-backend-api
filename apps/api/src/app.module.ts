@@ -1,18 +1,4 @@
-// import { Module } from '@nestjs/common';
-// import { ConfigModule } from '@nestjs/config';
-// import { HealthModule } from './modules/health/health.module';
-// import { PrismaModule } from './infra/prisma/prisma.module';
 
-// @Module({
-//   imports: [
-//     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
-//     PrismaModule,
-//     HealthModule,
-//   ],
-// })
-// export class AppModule {}
-
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';

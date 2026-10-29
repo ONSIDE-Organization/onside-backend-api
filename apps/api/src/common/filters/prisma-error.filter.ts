@@ -1,4 +1,3 @@
-// src/common/filters/prisma-error.filter.ts
 import {
   ArgumentsHost,
   Catch,
@@ -11,7 +10,7 @@ import {
 import type { Request, Response } from 'express';
 import * as Sentry from '@sentry/nestjs';
 import { correlationIdStorage } from '../middleware/correlation-id.middleware';
-import { Prisma } from 'src/infra/src/generated/prisma/client';
+import { Prisma } from '../../infra/src/generated/prisma/client';
 
 /**
  * Maps Prisma known-request error codes to HTTP statuses + app error codes.
