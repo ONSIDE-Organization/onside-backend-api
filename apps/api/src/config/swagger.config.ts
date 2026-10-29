@@ -55,7 +55,12 @@ export function setupSwagger(app: INestApplication): void {
   const logger = new Logger('Swagger');
 
   SwaggerModule.setup(SWAGGER_PATH, app, document, {
+      explorer: true,
     swaggerOptions: {
+       urls: [
+      { name: 'Staging', url: '/docs-json' }, // Point to your jsonDocumentUrl
+    ],
+    defaultExpandedDepth: 0, // Add this line
       persistAuthorization: true,      // keeps the token across page reloads in dev
       displayRequestDuration: true,
       docExpansion: 'none',            // collapsed by default; large APIs stay navigable
