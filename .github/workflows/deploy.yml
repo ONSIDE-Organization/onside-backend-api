@@ -1,5 +1,8 @@
 name: Deploy
-
-on: workflow_dispatch:
-
-jobs: deploy: runs-on: ubuntu-latest steps: - name: Confirm deployment workflow run: echo "TODO: configure Railway deployment after environment and secrets are set"
+on:
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "TODO: configure Railway deployment after environment and secrets are set"'
