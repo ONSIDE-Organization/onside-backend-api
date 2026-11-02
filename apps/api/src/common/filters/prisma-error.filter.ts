@@ -5,12 +5,10 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-//import { Prisma } from '@prisma/client';
-//import { Prisma } from '../src/generated/prisma/client';
+import { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import * as Sentry from '@sentry/nestjs';
 import { correlationIdStorage } from '../middleware/correlation-id.middleware';
-import { Prisma } from '../../infra/src/generated/prisma/client';
 
 /**
  * Maps Prisma known-request error codes to HTTP statuses + app error codes.
