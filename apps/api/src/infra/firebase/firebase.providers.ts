@@ -30,23 +30,34 @@ export const firebaseAdminAppProvider: Provider = {
   provide: FIREBASE_ADMIN_APP,
   inject: [ConfigService],
   useFactory: (config: ConfigService): admin.App => {
-  const raw = config.getOrThrow<string>('FIREBASE_PRIVATE_KEY');
-  console.log('[firebase] raw key length:', raw.length);
-  console.log('[firebase] raw starts with:', JSON.stringify(raw.slice(0, 50)));
-  console.log('[firebase] contains literal \\n (backslash-n):', raw.includes('\\n'));
-  console.log('[firebase] contains real newlines:', raw.includes('\n'));
-  console.log('[firebase] after replace, starts with:', JSON.stringify(raw.replace(/\\n/g, '\n').slice(0, 50)));
+   //const raw = config.getOrThrow<string>('FIREBASE_PRIVATE_KEY');
+  // console.log('[firebase] raw key length:', raw.length);
+  // console.log('[firebase] raw starts with:', JSON.stringify(raw.slice(0, 50)));
+  // console.log('[firebase] contains literal \\n (backslash-n):', raw.includes('\\n'));
+  // console.log('[firebase] contains real newlines:', raw.includes('\n'));
+  // console.log('[firebase] after replace, starts with:', JSON.stringify(raw.replace(/\\n/g, '\n').slice(0, 50)));
 
   const apps = getApps();
   if (apps.length) return apps[0]!;
-  return initializeApp({
-    credential: cert({
-      projectId: config.getOrThrow('FIREBASE_PROJECT_ID'),
-      clientEmail: config.getOrThrow('FIREBASE_CLIENT_EMAIL'),
-      privateKey: raw.replace(/\\n/g, '\n'),
-    }),
-  });
-},
+  
+    const b64 = config.getOrThrow<string>('FIREBASE_PRIVATE_KEY');
+    const serviceAccount = JSON.parse(
+      Buffer.from(b64, 'base64').toString('utf8'),
+    );
+
+    return initializeApp({
+      credential: cert(serviceAccount),
+    });
+  },
+};
+//   return initializeApp({
+//     credential: cert({
+//       projectId: config.getOrThrow('FIREBASE_PROJECT_ID'),
+//       clientEmail: config.getOrThrow('FIREBASE_CLIENT_EMAIL'),
+//       privateKey: raw.replace(/\\n/g, '\n'),
+//     }),
+//   });
+// },
   // useFactory: (config: ConfigService): admin.App => {
   //   const logger = new Logger('FirebaseAdmin');
 
@@ -71,7 +82,7 @@ export const firebaseAdminAppProvider: Provider = {
 
   //   return app;
   // },
-};
+//};
 
 /**
  * Exposes `admin.auth.Auth` as its own token so consumers don't have to
