@@ -71,7 +71,8 @@ export default (): AppConfig => {
       clientEmail: env.FIREBASE_CLIENT_EMAIL,
       // Railway stores "\n" literally; unescape once here so downstream
       // consumers never have to remember to.
-      privateKey: env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      // privateKey: env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      privateKey: Buffer.from(env.FIREBASE_PRIVATE_KEY, 'base64').toString('utf8'),
     },
     database: {
       url: env.DATABASE_URL,

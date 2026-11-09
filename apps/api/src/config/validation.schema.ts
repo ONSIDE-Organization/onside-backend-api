@@ -69,10 +69,23 @@ export const envSchema = z.object({
   // ── Firebase Admin SDK ──────────────────────────────────────────
   FIREBASE_PROJECT_ID: z.string().min(1),
   FIREBASE_CLIENT_EMAIL: z.string().email(),
+  // FIREBASE_PRIVATE_KEY: z
+  //   .string()
+  //   .min(1)
+  //   .refine((v) => v.includes('BEGIN PRIVATE KEY'), {
+  //     message: 'FIREBASE_PRIVATE_KEY looks malformed (missing PEM header)',
+  //   }),
   FIREBASE_PRIVATE_KEY: z
     .string()
     .min(1)
-    .refine((v) => v.includes('BEGIN PRIVATE KEY'), {
+    .refine((v) => {
+      try {
+        const decoded = Buffer.from(v, 'base64').toString('utf8');
+        return decoded.includes('BEGIN PRIVATE KEY');
+      } catch {
+        return false;
+      }
+    }, {
       message: 'FIREBASE_PRIVATE_KEY looks malformed (missing PEM header)',
     }),
 
