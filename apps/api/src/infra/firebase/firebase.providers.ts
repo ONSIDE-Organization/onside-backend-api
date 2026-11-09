@@ -3,7 +3,7 @@ import { Provider, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as admin from 'firebase-admin';
 import { getAuth } from 'firebase-admin/auth';
-import { cert, getApps } from 'firebase-admin/app';
+import { cert, getApps, initializeApp } from 'firebase-admin/app';
 
 /**
  * DI tokens — import these instead of magic strings.
@@ -30,29 +30,47 @@ export const firebaseAdminAppProvider: Provider = {
   provide: FIREBASE_ADMIN_APP,
   inject: [ConfigService],
   useFactory: (config: ConfigService): admin.App => {
-    const logger = new Logger('FirebaseAdmin');
+  const raw = config.getOrThrow<string>('FIREBASE_PRIVATE_KEY');
+  console.log('[firebase] raw key length:', raw.length);
+  console.log('[firebase] raw starts with:', JSON.stringify(raw.slice(0, 50)));
+  console.log('[firebase] contains literal \\n (backslash-n):', raw.includes('\\n'));
+  console.log('[firebase] contains real newlines:', raw.includes('\n'));
+  console.log('[firebase] after replace, starts with:', JSON.stringify(raw.replace(/\\n/g, '\n').slice(0, 50)));
 
-    // Guard against double-init across module reloads
-    const existing = getApps().find((a) => a.name === '[DEFAULT]');
-    if (existing) {
-      logger.debug('Reusing existing Firebase Admin app');
-      return existing;
-    }
+  const apps = getApps();
+  if (apps.length) return apps[0]!;
+  return initializeApp({
+    credential: cert({
+      projectId: config.getOrThrow('FIREBASE_PROJECT_ID'),
+      clientEmail: config.getOrThrow('FIREBASE_CLIENT_EMAIL'),
+      privateKey: raw.replace(/\\n/g, '\n'),
+    }),
+  });
+},
+  // useFactory: (config: ConfigService): admin.App => {
+  //   const logger = new Logger('FirebaseAdmin');
 
-    const app = admin.initializeApp({
-      credential: cert({
-        projectId: config.getOrThrow<string>('firebase.projectId'),
-        clientEmail: config.getOrThrow<string>('firebase.clientEmail'),
-        privateKey: config.getOrThrow<string>('firebase.privateKey'),
-      }),
-    });
+  //   // Guard against double-init across module reloads
+  //   const existing = getApps().find((a) => a.name === '[DEFAULT]');
+  //   if (existing) {
+  //     logger.debug('Reusing existing Firebase Admin app');
+  //     return existing;
+  //   }
 
-    logger.log(
-      `Firebase Admin initialized (project: ${config.get('firebase.projectId')})`,
-    );
+  //   const app = admin.initializeApp({
+  //     credential: cert({
+  //       projectId: config.getOrThrow<string>('firebase.projectId'),
+  //       clientEmail: config.getOrThrow<string>('firebase.clientEmail'),
+  //       privateKey: config.getOrThrow<string>('firebase.privateKey'),
+  //     }),
+  //   });
 
-    return app;
-  },
+  //   logger.log(
+  //     `Firebase Admin initialized (project: ${config.get('firebase.projectId')})`,
+  //   );
+
+  //   return app;
+  // },
 };
 
 /**
