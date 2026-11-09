@@ -59,6 +59,21 @@ export class AuthController {
     return this.register.execute(dto);
   }
 
+//  @Public()
+// @Post('dev-register')
+// @HttpCode(201)
+// @ApiOperation({
+//   summary: '[DEV ONLY] Register without Firebase — for testing',
+// })
+// async devRegister(@Body(new ZodValidationPipe(registerSchema)) dto: RegisterDto) {
+//   const decoded = {
+//     uid: `dev-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+//     email: `dev-${Date.now()}@test.local`,
+//     picture: undefined,
+//   };
+//   return this.register.executeWithDecoded(decoded, dto);
+// }
+
   @Public()
   @Post('login')
   @HttpCode(200)
