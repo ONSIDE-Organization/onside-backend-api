@@ -9,6 +9,7 @@ import { FirebaseTokenVerifier } from './infra/firebase-token.verifier';
 import { JwtStrategy } from './infra/jwt.strategy';
 import { RegisterUseCase } from './application/register.use-case';
 import { CheckUsernameUseCase } from './application/check-username.use-case';
+import { LogoutUseCase } from './application/logout.use-case';
 
 /**
  * Auth module — Firebase → Onside JWT exchange and session validation.
@@ -30,7 +31,8 @@ import { CheckUsernameUseCase } from './application/check-username.use-case';
     FirebaseTokenVerifier,
     JwtStrategy,      // Passport strategy — must be in providers, not exports
     RegisterUseCase,
-    CheckUsernameUseCase
+    CheckUsernameUseCase,
+    LogoutUseCase
   ],
 })
 export class AuthModule {}

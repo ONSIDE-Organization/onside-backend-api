@@ -33,6 +33,7 @@ export class LoginUseCase {
     const accessToken = await this.jwt.signAsync({
       sub: user.id,
       username: user.username,
+      ver: user.tokenVersion,
     });
 
     this.logger.log({ msg: 'user-logged-in', userId: user.id });

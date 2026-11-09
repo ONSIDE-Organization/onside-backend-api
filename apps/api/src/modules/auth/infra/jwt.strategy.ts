@@ -15,6 +15,7 @@ import type { AuthUser } from '../../../common/decorators/current-user.decorator
 export interface OnsideJwtPayload {
   sub: string;        // User.id (uuid)
   username: string;   // denormalized for logging, not authorization
+  ver?: number;       // token version for revocation
   iat?: number;
   exp?: number;
 }
@@ -50,7 +51,59 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
+  // src/modules/auth/infra/jwt.strategy.ts
   async validate(payload: OnsideJwtPayload): Promise<AuthUser> {
+    if (!payload?.sub || typeof payload.sub !== 'string') {
+      throw new UnauthorizedException({
+        status: 401,
+        code: 'INVALID_TOKEN_PAYLOAD',
+        message: 'Authentication required',
+      });
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        tokenVersion: true,  
+      },
+    });
+
+    if (!user) {
+      this.logger.warn({ msg: 'token-for-deleted-user', userId: payload.sub });
+      throw new UnauthorizedException({
+        status: 401,
+        code: 'ACCOUNT_NOT_FOUND',
+        message: 'Account no longer exists',
+      });
+    }
+
+    // ← ADD THIS BLOCK
+    const tokenVer = payload.ver ?? 0;
+    if (tokenVer !== user.tokenVersion) {
+      this.logger.warn({
+        msg: 'token-version-mismatch',
+        userId: user.id,
+        tokenVer,
+        currentVer: user.tokenVersion,
+      });
+      throw new UnauthorizedException({
+        status: 401,
+        code: 'TOKEN_REVOKED',
+        message: 'Session has been revoked. Please log in again.',
+      });
+    }
+
+    return {
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+    };
+  }
+
+  async validateold(payload: OnsideJwtPayload): Promise<AuthUser> {
     // Guard against malformed payloads (shouldn't happen if we signed it,
     // but a JWT-secret rotation mistake could let a stale token through).
     if (!payload?.sub || typeof payload.sub !== 'string') {

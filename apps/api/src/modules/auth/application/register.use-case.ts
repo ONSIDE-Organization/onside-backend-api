@@ -54,6 +54,7 @@ export class RegisterUseCase {
       const accessToken = await this.jwt.signAsync({
         sub: user.id,
         username: user.username,
+        ver: user.tokenVersion,
       });
 
       this.logger.log({ msg: 'user-registered', userId: user.id });
