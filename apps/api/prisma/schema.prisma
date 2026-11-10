@@ -10,15 +10,17 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
-  firebaseUid  String   @unique @map("firebase_uid")
-  username     String   @unique
-  email        String   @unique
-  displayName  String   @map("display_name")
-  avatarUrl    String?  @map("avatar_url")
-  tokenVersion Int      @default(0)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id            String    @id @default(uuid())
+  firebaseUid   String    @unique
+  email         String    @unique
+  username      String    @unique
+  displayName   String
+  avatarUrl     String?
+  tokenVersion  Int       @default(0)
+  deletedAt     DateTime?          // ← add this
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
+  @@index([deletedAt])
   @@map("users")
 }

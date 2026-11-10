@@ -50,21 +50,18 @@ export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
   });
 }
 
+
 export function setupSwagger(app: INestApplication): void {
   const document = buildOpenApiDocument(app);
   const logger = new Logger('Swagger');
 
   SwaggerModule.setup(SWAGGER_PATH, app, document, {
-      explorer: true,
+    explorer: false,
     swaggerOptions: {
-       urls: [
-      { name: 'Staging', url: '/docs-json' }, // Point to your jsonDocumentUrl
-    ],
-    defaultExpandedDepth: 0, // Add this line
-      persistAuthorization: true,      // keeps the token across page reloads in dev
+      persistAuthorization: true,
       displayRequestDuration: true,
-      docExpansion: 'none',            // collapsed by default; large APIs stay navigable
-      filter: true,                    // client-side route search
+      docExpansion: 'none',
+      filter: true,
       tagsSorter: 'alpha',
       operationsSorter: 'alpha',
     },
@@ -72,6 +69,33 @@ export function setupSwagger(app: INestApplication): void {
     jsonDocumentUrl: SWAGGER_JSON_PATH,
   });
 
-  logger.log(`📘 Swagger UI available at /${SWAGGER_PATH}`);
-  logger.log(`📘 OpenAPI JSON available at /${SWAGGER_JSON_PATH}`);
+  logger.log(`Swagger UI available at /${SWAGGER_PATH}`);
+  logger.log(`OpenAPI JSON available at /${SWAGGER_JSON_PATH}`);
 }
+
+
+// export function setupSwagger(app: INestApplication): void {
+//   const document = buildOpenApiDocument(app);
+//   const logger = new Logger('Swagger');
+
+//   SwaggerModule.setup(SWAGGER_PATH, app, document, {
+//       explorer: true,
+//     swaggerOptions: {
+//        urls: [
+//       { name: 'Staging', url: '/docs-json' }, // Point to your jsonDocumentUrl
+//     ],
+//     defaultExpandedDepth: 0, // Add this line
+//       persistAuthorization: true,      // keeps the token across page reloads in dev
+//       displayRequestDuration: true,
+//       docExpansion: 'none',            // collapsed by default; large APIs stay navigable
+//       filter: true,                    // client-side route search
+//       tagsSorter: 'alpha',
+//       operationsSorter: 'alpha',
+//     },
+//     customSiteTitle: 'Onside API Docs',
+//     jsonDocumentUrl: SWAGGER_JSON_PATH,
+//   });
+
+//   logger.log(`📘 Swagger UI available at /${SWAGGER_PATH}`);
+//   logger.log(`📘 OpenAPI JSON available at /${SWAGGER_JSON_PATH}`);
+// }
