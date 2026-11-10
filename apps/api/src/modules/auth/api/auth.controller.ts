@@ -1,20 +1,21 @@
 // src/modules/auth/api/auth.controller.ts
-import { 
-  Body, 
-  Controller, 
-  Get, 
-  HttpCode, 
-  Post, 
-  Query, 
-  UsePipes 
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Query,
+  Req,
+  UsePipes
 } from '@nestjs/common';
-import { 
-  ApiBearerAuth, 
-  ApiBody, 
-  ApiOperation, 
-  ApiQuery, 
-  ApiResponse, 
-  ApiTags 
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags
 } from '@nestjs/swagger';
 import { Public } from '../../../common/decorators/public.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
@@ -25,6 +26,7 @@ import { RegisterUseCase } from '../application/register.use-case';
 import { CheckUsernameUseCase } from '../application/check-username.use-case';
 import { loginSchema, registerSchema, checkUsernameSchema } from './dto/auth.dto';
 import type { LoginDto, RegisterDto, CheckUsernameDto } from './dto/auth.dto';
+import { LogoutUseCase } from '../application/logout.use-case';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
@@ -33,7 +35,8 @@ export class AuthController {
     private readonly login: LoginUseCase,
     private readonly register: RegisterUseCase,
     private readonly checkUsername: CheckUsernameUseCase,
-  ) {}
+    private readonly logoutUseCase: LogoutUseCase
+  ) { }
 
   @Public()
   @Post('register')
@@ -59,21 +62,6 @@ export class AuthController {
     return this.register.execute(dto);
   }
 
-//  @Public()
-// @Post('dev-register')
-// @HttpCode(201)
-// @ApiOperation({
-//   summary: '[DEV ONLY] Register without Firebase — for testing',
-// })
-// async devRegister(@Body(new ZodValidationPipe(registerSchema)) dto: RegisterDto) {
-//   const decoded = {
-//     uid: `dev-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-//     email: `dev-${Date.now()}@test.local`,
-//     picture: undefined,
-//   };
-//   return this.register.executeWithDecoded(decoded, dto);
-// }
-
   @Public()
   @Post('login')
   @HttpCode(200)
@@ -95,16 +83,14 @@ export class AuthController {
     return this.login.execute(dto.idToken);
   }
 
-  @Public()
   @Post('logout')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Invalidate session' })
-  @ApiResponse({ status: 204, description: 'Session invalidated (token deleted client-side).' })
-  async logout() {
-    // Stateless JWT architecture: actual logout is handled client-side
-    // by deleting the token. This endpoint exists for PRD compliance and
-    // future-proofing if we add refresh tokens or a token denylist.
-    return;
+  @ApiBearerAuth('onside-jwt')
+  @ApiOperation({ summary: 'Invalidate all sessions for the current user' })
+  @ApiResponse({ status: 204, description: 'All tokens for this user are now invalid.' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid bearer token.' })
+  async logout(@CurrentUser() user: AuthUser) {
+    await this.logoutUseCase.execute(user.id);
   }
 
   @Public()
@@ -118,8 +104,8 @@ export class AuthController {
     description: 'The username to check for availability',
     example: 'goziem',
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Returns availability status.',
     schema: {
       type: 'object',
@@ -136,8 +122,8 @@ export class AuthController {
   @Get('me')
   @ApiBearerAuth('onside-jwt')
   @ApiOperation({ summary: 'Get my profile (alias for /users/me)' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Returns current authenticated user profile.',
     schema: {
       type: 'object',
