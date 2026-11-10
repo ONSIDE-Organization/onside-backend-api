@@ -63,15 +63,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
-      select: {
-        id: true,
-        username: true,
-        displayName: true,
-        tokenVersion: true,  
-      },
+      select: { id: true, username: true, displayName: true, tokenVersion: true, deletedAt: true },
     });
 
-    if (!user) {
+    if (!user || user.deletedAt)  {
       this.logger.warn({ msg: 'token-for-deleted-user', userId: payload.sub });
       throw new UnauthorizedException({
         status: 401,
