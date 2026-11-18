@@ -31,6 +31,7 @@ import { PullFixturesScheduler } from './jobs/schedulers/pull-fixtures.scheduler
 import { JobsModule } from './jobs/jobs.module';
 import { RivalriesModule } from './modules/rivalries/rivalries.module';
 import { LeaguesModule } from './modules/leagues/leagues.module';
+import { MatchweeksModule } from './modules/matchweeks/matchweeks.module';
 
 @Module({
   imports: [
@@ -51,7 +52,7 @@ import { LeaguesModule } from './modules/leagues/leagues.module';
     PredictionsModule,
     ScoringModule,
     JobsModule,
-
+    MatchweeksModule,
     // ── JWT (our own, post-Firebase) ───────────────────────────────
     JwtModule.registerAsync({
       global: true,
