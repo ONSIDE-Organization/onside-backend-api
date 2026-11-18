@@ -1,0 +1,58 @@
+// src/modules/leagues/api/leagues.controller.ts
+import { Body, Controller, Get, Param, Post, UsePipes } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import type { AuthUser } from '../../../common/decorators/current-user.decorator';
+import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe';
+import { CreateLeagueUseCase } from '../application/create-league.use-case';
+import { JoinLeagueUseCase } from '../application/join-league.use-case';
+import { GetLeaderboardUseCase } from '../application/get-leaderboard.use-case';
+import { CreateLeagueDto, createLeagueSchema, JoinLeagueDto, joinLeagueSchema } from './dto/league.dto';
+
+
+@ApiTags('Leagues')
+@ApiBearerAuth('onside-jwt')
+@Controller({ path: 'leagues', version: '1' })
+export class LeaguesController {
+  constructor(
+    private readonly createLeague: CreateLeagueUseCase,
+    private readonly joinLeague: JoinLeagueUseCase,
+    private readonly getLeaderboard: GetLeaderboardUseCase,
+  ) {}
+
+  @Post()
+  @UsePipes(new ZodValidationPipe(createLeagueSchema))
+  @ApiOperation({ summary: 'Create a private league' })
+  @ApiBody({ schema: { type: 'object', properties: { name: { type: 'string', example: 'The Lads' } } } })
+  async create(@CurrentUser() user: AuthUser, @Body() dto: CreateLeagueDto) {
+    return this.createLeague.execute(user.id, dto);
+  }
+
+  @Get('me')
+  @ApiOperation({ summary: 'Get all leagues I belong to' })
+  async getMyLeagues(@CurrentUser() user: AuthUser) {
+    // return this.getMyLeagues.execute(user.id);
+    return [];
+  }
+
+  @Post('join')
+  @UsePipes(new ZodValidationPipe(joinLeagueSchema))
+  @ApiOperation({ summary: 'Join a league via invite code' })
+  @ApiBody({ schema: { type: 'object', properties: { inviteCode: { type: 'string', example: 'ABC123' } } } })
+  async join(@CurrentUser() user: AuthUser, @Body() dto: JoinLeagueDto) {
+    return this.joinLeague.execute(user.id, dto.inviteCode);
+  }
+
+  @Get(':id/leaderboard')
+  @ApiOperation({ summary: 'Get league leaderboard (weekly & season)' })
+  async leaderboard(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.getLeaderboard.execute(id);
+  }
+
+  @Get(':id/members')
+  @ApiOperation({ summary: 'Get league members and their active picks' })
+  async members(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    // return this.getMembers.execute(id);
+    return [];
+  }
+}

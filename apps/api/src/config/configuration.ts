@@ -30,7 +30,8 @@ export interface AppConfig {
     url: string;
   };
   // Phase 2+ — optional in M1, presence-checked by the modules that need them
-  sportsApi?: { key: string };
+  sportsApi?: { key: string; baseUrl: string };
+  sportsApiBaseUrl: string;
   redis?: { url: string };
 }
 
@@ -77,7 +78,8 @@ export default (): AppConfig => {
     database: {
       url: env.DATABASE_URL,
     },
-    sportsApi: env.SPORTS_API_KEY ? { key: env.SPORTS_API_KEY } : undefined,
+    sportsApi: env.SPORTS_API_KEY ? { key: env.SPORTS_API_KEY, baseUrl: env.SPORTS_API_BASE_URL } : undefined,
+    sportsApiBaseUrl: env.SPORTS_API_BASE_URL,
     redis: env.REDIS_URL ? { url: env.REDIS_URL } : undefined,
   };
 };
