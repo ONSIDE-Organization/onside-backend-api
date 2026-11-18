@@ -39,7 +39,7 @@ export class SubmitPicksUseCase {
     }
 
     for (const pick of dto.picks) {
-      const prediction = predictions.find((p) => p.id === pick.predictionId)!;
+      const prediction = predictions.find((p: (typeof predictions)[number]) => p.id === pick.predictionId)!;
       const options = prediction.options as string[];
       if (!options.includes(pick.selectedOption)) {
         throw new BadRequestException({
