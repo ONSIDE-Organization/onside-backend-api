@@ -68,6 +68,7 @@ export const envSchema = z.object({
 
   // ── Phase 2+ (validated when present, boot doesn't require them) ─
   SPORTS_API_KEY: z.string().optional(),
+ SPORTS_API_BASE_URL: z.string().url().default('https://sports.bzzoiro.com/api/v2'),
   REDIS_URL: z
     .string()
     .url()

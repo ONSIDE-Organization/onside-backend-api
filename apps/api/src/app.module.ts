@@ -23,6 +23,15 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { PrismaErrorFilter } from './common/filters/prisma-error.filter';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 import { RequestLoggerInterceptor } from './common/interceptors/request-logger.interceptor';
+import { ScoringModule } from './modules/scoring/scoring.module';
+import { PredictionsModule } from './modules/predictions/predictions.module';
+import { SportsApiModule } from './infra/sports-api/sports-api.module';
+import { ScorePredictionsScheduler } from './jobs/schedulers/score-predictions.scheduler';
+import { PullFixturesScheduler } from './jobs/schedulers/pull-fixtures.scheduler';
+import { JobsModule } from './jobs/jobs.module';
+import { RivalriesModule } from './modules/rivalries/rivalries.module';
+import { LeaguesModule } from './modules/leagues/leagues.module';
+import { MatchweeksModule } from './modules/matchweeks/matchweeks.module';
 
 @Module({
   imports: [
@@ -39,7 +48,11 @@ import { RequestLoggerInterceptor } from './common/interceptors/request-logger.i
     // ── Data ───────────────────────────────────────────────────────
     PrismaModule, // @Global() — provides PrismaService everywhere
     FirebaseModule, // @Global() — provides FIREBASE_ADMIN token
-
+    SportsApiModule,
+    PredictionsModule,
+    ScoringModule,
+    JobsModule,
+    MatchweeksModule,
     // ── JWT (our own, post-Firebase) ───────────────────────────────
     JwtModule.registerAsync({
       global: true,
@@ -59,6 +72,8 @@ import { RequestLoggerInterceptor } from './common/interceptors/request-logger.i
     HealthModule,
     AuthModule,
     UsersModule,
+    RivalriesModule,
+    LeaguesModule,
   ],
   providers: [
     // ── Global guard — secure by default ───────────────────────────
@@ -87,6 +102,8 @@ import { RequestLoggerInterceptor } from './common/interceptors/request-logger.i
     // way, order is correct because the @Catch scopes are disjoint.
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     { provide: APP_FILTER, useClass: PrismaErrorFilter },
+    PullFixturesScheduler,
+    ScorePredictionsScheduler,
   ],
 })
 export class AppModule {}

@@ -9,18 +9,196 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// ── Enums ────────────────────────────────────────────────────────
+
+enum MatchweekStatus {
+  UPCOMING
+  LIVE
+  FINISHED
+  LOCKED
+}
+
+enum MatchStatus {
+  UPCOMING
+  LIVE
+  FINISHED
+  POSTPONED
+  CANCELLED
+  UNRESOLVED
+}
+
+enum PredictionCategory {
+  TEAMS
+  GOALSCORERS
+  ASSISTS
+  MATCHWEEK
+  MANAGERS
+}
+
+enum ResolutionType {
+  AUTO_FIXTURE_RESULT // resolved by match result (home/draw/away)
+  AUTO_PLAYER_STAT // resolved by player stat (goals, assists)
+  AUTO_TEAM_STAT // resolved by team stat (goals scored this week)
+  MANUAL // admin resolves
+}
+
+enum PredictionStatus {
+  OPEN // accepting picks
+  LOCKED // deadline passed, awaiting resolution
+  RESOLVED // outcome known, points awarded
+  VOID // cancelled (match postponed > X days)
+}
+
 model User {
-  id            String    @id @default(uuid())
-  firebaseUid   String    @unique
-  email         String    @unique
-  username      String    @unique
-  displayName   String
-  avatarUrl     String?
-  tokenVersion  Int       @default(0)
-  deletedAt     DateTime?          // ← add this
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String           @id @default(uuid()) @db.Uuid
+  firebaseUid       String           @unique
+  email             String           @unique
+  username          String           @unique
+  displayName       String
+  avatarUrl         String?
+  tokenVersion      Int              @default(0)
+  deletedAt         DateTime? // ← add this
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  predictions       UserPrediction[]
+  // Rivalry relationships
+  createdRivalries  Rivalry[]        @relation("RivalryCreator")
+  receivedRivalries Rivalry[]        @relation("RivalryOpponent")
+  wonRivalries      Rivalry[]        @relation("RivalryWinner")
+  ownedLeagues      League[]         @relation("LeagueOwner")
+  leagueMemberships LeagueMember[]
 
   @@index([deletedAt])
   @@map("users")
+}
+
+// apps/api/prisma/schema.prisma
+
+// ── Models ───────────────────────────────────────────────────────
+
+model Matchweek {
+  id         String          @id @default(uuid()) @db.Uuid
+  season     String // e.g. "2026/27"
+  weekNumber Int             @map("week_number")
+  deadline   DateTime        @map("deadline") // when picks lock
+  status     MatchweekStatus @default(UPCOMING)
+  createdAt  DateTime        @default(now()) @map("created_at")
+
+  matches     Match[]
+  predictions Prediction[]
+
+  @@unique([season, weekNumber])
+  @@map("matchweeks")
+}
+
+model Match {
+  id          String      @id @default(uuid()) @db.Uuid
+  externalId  Int         @unique @map("external_id") // Bzzoiro event id
+  matchweekId String      @map("matchweek_id") @db.Uuid
+  homeTeam    String      @map("home_team")
+  awayTeam    String      @map("away_team")
+  kickoff     DateTime
+  status      MatchStatus @default(UPCOMING)
+  homeScore   Int?        @map("home_score")
+  awayScore   Int?        @map("away_score")
+  result      String? // "HOME" | "DRAW" | "AWAY" — set on resolution
+
+  matchweek   Matchweek    @relation(fields: [matchweekId], references: [id])
+  predictions Prediction[]
+
+  @@index([matchweekId])
+  @@map("matches")
+}
+
+model Prediction {
+  id               String             @id @default(uuid()) @db.Uuid
+  matchweekId      String             @map("matchweek_id") @db.Uuid
+  matchId          String?            @map("match_id") @db.Uuid // null for season-long predictions
+  category         PredictionCategory
+  question         String // "Who wins the Premier League?"
+  options          Json // ["Arsenal", "Liverpool", "Man City"] or ["Arsenal", "Liverpool"]
+  resolutionType   ResolutionType     @map("resolution_type")
+  resolutionConfig Json?              @map("resolution_config") // e.g. { teamId: 3021 } for player stat
+  status           PredictionStatus   @default(OPEN)
+  correctOption    String?            @map("correct_option")
+  pointsValue      Int                @default(10) @map("points_value")
+  deadline         DateTime
+  resolvedAt       DateTime?          @map("resolved_at")
+  createdAt        DateTime           @default(now()) @map("created_at")
+
+  matchweek Matchweek        @relation(fields: [matchweekId], references: [id])
+  match     Match?           @relation(fields: [matchId], references: [id])
+  userPicks UserPrediction[]
+  rivalries Rivalry[]
+
+  @@index([matchweekId, status])
+  @@index([deadline])
+  @@map("predictions")
+}
+
+model UserPrediction {
+  id             String   @id @default(uuid()) @db.Uuid
+  predictionId   String   @map("prediction_id") @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  selectedOption String   @map("selected_option")
+  isCorrect      Boolean? @map("is_correct")
+  pointsAwarded  Int?     @map("points_awarded")
+  submittedAt    DateTime @default(now()) @map("submitted_at")
+
+  prediction Prediction @relation(fields: [predictionId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+
+  @@unique([predictionId, userId])
+  @@index([userId])
+  @@map("user_predictions")
+}
+
+model Rivalry {
+  id           String    @id @default(uuid()) @db.Uuid
+  creatorId    String    @map("creator_id") @db.Uuid
+  opponentId   String    @map("opponent_id") @db.Uuid
+  predictionId String    @map("prediction_id") @db.Uuid
+  status       String    @default("PENDING") // PENDING, ACTIVE, RESOLVED, DECLINED
+  winnerId     String?   @map("winner_id") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at")
+  resolvedAt   DateTime? @map("resolved_at")
+
+  creator    User       @relation("RivalryCreator", fields: [creatorId], references: [id])
+  opponent   User       @relation("RivalryOpponent", fields: [opponentId], references: [id])
+  prediction Prediction @relation(fields: [predictionId], references: [id])
+  winner     User?      @relation("RivalryWinner", fields: [winnerId], references: [id])
+
+  @@index([creatorId])
+  @@index([opponentId])
+  @@index([winnerId])
+  @@map("rivalries")
+}
+
+model League {
+  id         String   @id @default(uuid()) @db.Uuid
+  ownerId    String   @map("owner_id") @db.Uuid
+  name       String
+  inviteCode String   @unique @map("invite_code")
+  type       String   @default("PRIVATE") // PRIVATE, PUBLIC
+  isPaid     Boolean  @default(false) @map("is_paid")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  owner   User           @relation("LeagueOwner", fields: [ownerId], references: [id])
+  members LeagueMember[]
+
+  @@map("leagues")
+}
+
+model LeagueMember {
+  id          String   @id @default(uuid()) @db.Uuid
+  leagueId    String   @map("league_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  stakeAmount Int      @default(0) @map("stake_amount")
+  joinedAt    DateTime @default(now()) @map("joined_at")
+
+  league League @relation(fields: [leagueId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([leagueId, userId])
+  @@map("league_members")
 }
