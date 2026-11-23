@@ -79,15 +79,15 @@ async function bootstrap() {
 
   // ── Global validation — Zod is used at DTO level; this is the
   //    last-line class-validator defense for any misannotated DTO ───
-  // app.useGlobalPipes(
-  //   new ValidationPipe({
-  //     whitelist: true,               // strip unknown props
-  //     forbidNonWhitelisted: true,    // 400 on unexpected props
-  //     transform: true,
-  //     transformOptions: { enableImplicitConversion: false }, // explicit @Type()
-  //     validationError: { target: false, value: false },      // don't leak payload
-  //   }),
-  // );
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,               // strip unknown props
+      forbidNonWhitelisted: true,    // 400 on unexpected props
+      transform: true,
+      transformOptions: { enableImplicitConversion: false }, // explicit @Type()
+      validationError: { target: false, value: false },      // don't leak payload
+    }),
+  );
 
   // ── Global filters — order matters: specific before generic ──────
   app.useGlobalFilters(new PrismaErrorFilter(), new AllExceptionsFilter());
