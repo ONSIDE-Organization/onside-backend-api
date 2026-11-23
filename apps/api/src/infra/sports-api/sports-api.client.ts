@@ -43,27 +43,47 @@ export class SportsApiClient {
    * Fetch fixtures for a given date range.
    * Bzzoiro v2: GET /events/?date_from=YYYY-MM-DD&date_to=YYYY-MM-DD
    */
-  async getEvents(params: {
-    dateFrom?: string;
-    dateTo?: string;
-    leagueId?: number;
-    seasonId?: number;
-    limit?: number;
-    offset?: number;
-  }): Promise<BzzoiroEventsResponse> {
-    const { data } = await this.http.get<BzzoiroEventsResponse>('/events/', {
-      params: {
-        date_from: params.dateFrom,
-        date_to: params.dateTo,
-        league_id: params.leagueId,
-        season_id: params.seasonId,
-        limit: params.limit ?? 50,
-        offset: params.offset ?? 0,
-      },
-    });
-    return data;
-  }
-
+  // async getEvents(params: {
+  //   dateFrom?: string;
+  //   dateTo?: string;
+  //   leagueId?: number;
+  //   seasonId?: number;
+  //   limit?: number;
+  //   offset?: number;
+  // }): Promise<BzzoiroEventsResponse> {
+  //   const { data } = await this.http.get<BzzoiroEventsResponse>('/events/', {
+  //     params: {
+  //       date_from: params.dateFrom,
+  //       date_to: params.dateTo,
+  //       league_id: params.leagueId,
+  //       season_id: params.seasonId,
+  //       limit: params.limit ?? 50,
+  //       offset: params.offset ?? 0,
+  //     },
+  //   });
+  //   return data;
+  // }
+// src/infra/sports-api/sports-api.client.ts
+async getEvents(params: {
+  dateFrom?: string;
+  dateTo?: string;
+  leagueId?: number; // ← Add this
+  seasonId?: number;
+  limit?: number;
+  offset?: number;
+}): Promise<BzzoiroEventsResponse> {
+  const { data } = await this.http.get<BzzoiroEventsResponse>('/events/', {
+    params: {
+      date_from: params.dateFrom,
+      date_to: params.dateTo,
+      league_id: params.leagueId, // ← Add this
+      season_id: params.seasonId,
+      limit: params.limit ?? 50,
+      offset: params.offset ?? 0,
+    },
+  });
+  return data;
+}
   /**
    * Fetch a single event by Bzzoiro ID.
    */
