@@ -82,14 +82,14 @@ export class SportsApiClient {
 
 
 
-/**
- * 
- * @param leagueId 
- * @returns 
- */
-async getCurrentSeason(leagueId: number): Promise<{ id: number; name: string }> {
-  const { data } = await this.http.get(`/leagues/${leagueId}/season/`);
-  return data;
-}
+// /**
+//  * 
+//  * @param leagueId 
+//  * @returns 
+//  */
+// async getCurrentSeason(leagueId: number): Promise<{ id: number; name: string }> {
+//   const { data } = await this.http.get(`/leagues/${leagueId}/season/`);
+//   return data;
+// }
 
 }

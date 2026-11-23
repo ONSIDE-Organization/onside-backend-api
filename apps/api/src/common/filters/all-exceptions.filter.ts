@@ -66,7 +66,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
         'Unhandled server error',
       );
     } else {
-      this.logger.warn(logPayload, 'Client error');
+      // this.logger.warn(logPayload, 'Client error');
+      this.logger.warn(
+    { ...logPayload, message: this.resolveMessage(exception) },
+    'Client error',
+  );
     }
 
     // ── Response — never leak internals ────────────────────────────
