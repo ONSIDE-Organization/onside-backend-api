@@ -5,8 +5,10 @@ import { PrismaService } from '../../../infra/prisma/prisma.service';
 export class GetLeaderboardUseCase {
   constructor(private readonly prisma: PrismaService) {}
 
-  async execute(leagueId: string) {
-    // Aggregate points for users in this league
+  async execute(leagueId: string, matchweekId?: string) {
+    // If a matchweekId is provided, we filter the query by it.
+    // The Prisma raw query uses an optional parameter `$2` which is either the matchweekId or null.
+    
     const leaderboard = await this.prisma.$queryRaw`
       SELECT 
         u.id as "userId",
@@ -19,7 +21,9 @@ export class GetLeaderboardUseCase {
       FROM "league_members" lm
       JOIN "users" u ON u.id = lm.user_id
       LEFT JOIN "user_predictions" up ON up.user_id = u.id
+      LEFT JOIN "predictions" p ON p.id = up."prediction_id"
       WHERE lm.league_id = ${leagueId}::uuid
+      AND (${matchweekId}::uuid IS NULL OR p."matchweek_id" = ${matchweekId}::uuid)
       GROUP BY u.id
       ORDER BY "totalPoints" DESC;
     `;
