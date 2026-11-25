@@ -7,6 +7,10 @@ import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe';
 import { CreateRivalryUseCase } from '../application/create-rivalry.use-case';
 import { createRivalrySchema } from './dto/create-rivalry.dto';
 import type { CreateRivalryDto } from './dto/create-rivalry.dto';
+import { AcceptRivalryUseCase } from '../application/accept-rivalry.use-case';
+import { GetRivalryDetailUseCase } from '../application/get-rivalry-detail.use-case';
+import { DeclineRivalryUseCase } from '../application/decline-rivalry.use-case';
+import { GetRivalriesUseCase } from '../application/get-rivalries.use-case';
 
 @ApiTags('Rivalries')
 @ApiBearerAuth('onside-jwt')
@@ -14,7 +18,10 @@ import type { CreateRivalryDto } from './dto/create-rivalry.dto';
 export class RivalriesController {
   constructor(
     private readonly createRivalry: CreateRivalryUseCase,
-    // Other use cases injected here...
+    private readonly acceptRivalry: AcceptRivalryUseCase,
+    private readonly getRivalries: GetRivalriesUseCase,
+    private readonly getRivalryDetail:GetRivalryDetailUseCase,
+    private readonly declineRivalry: DeclineRivalryUseCase,
   ) {}
 
   @Get()
@@ -24,8 +31,7 @@ export class RivalriesController {
     @CurrentUser() user: AuthUser,
     @Query('status') status?: string,
   ) {
-    // return this.getRivalries.execute(user.id, status);
-    return [];
+     return this.getRivalries.execute(user.id, status);
   }
 
   @Post()
@@ -54,22 +60,22 @@ export class RivalriesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get single rivalry detail' })
-  async getRivalryDetail(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    // return this.getRivalryDetail.execute(user.id, id);
+  async getARivalryDetail(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.getRivalryDetail.execute(user.id, id);
     return {};
   }
 
   @Put(':id/accept')
   @ApiOperation({ summary: 'Accept a rivalry' })
-  async acceptRivalry(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    // return this.acceptRivalry.execute(user.id, id);
+  async acceptNewRivalry(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.acceptRivalry.execute(user.id, id);
     return {};
   }
 
   @Put(':id/decline')
   @ApiOperation({ summary: 'Decline a rivalry' })
-  async declineRivalry(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    // return this.declineRivalry.execute(user.id, id);
+  async declineARivalry(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+     return this.declineRivalry.execute(user.id, id);
     return {};
   }
 }
