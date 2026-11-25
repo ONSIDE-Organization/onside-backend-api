@@ -20,7 +20,7 @@ export class PredictionsController {
 
   @Post()
   @HttpCode(200)
-  @UsePipes(new ZodValidationPipe(submitPicksSchema))
+  // @UsePipes(new ZodValidationPipe(submitPicksSchema))
   @ApiOperation({ summary: 'Submit user picks for a matchweek' })
   @ApiBody({
     schema: {
@@ -43,7 +43,8 @@ export class PredictionsController {
   })
   async submitMyPicks(
     @CurrentUser() user: AuthUser,
-    @Body() dto: SubmitPicksDto,
+    // @Body() dto: SubmitPicksDto,
+    @Body(new ZodValidationPipe(submitPicksSchema)) dto: SubmitPicksDto,
   ) {
     return this.submitPicks.execute(user.id, dto);
   }
