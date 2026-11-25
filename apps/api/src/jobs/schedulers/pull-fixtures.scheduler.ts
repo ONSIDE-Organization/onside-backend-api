@@ -204,11 +204,12 @@ export class PullFixturesScheduler {
 
   // Bzzoiro's ID for the Premier League
   private readonly PREMIER_LEAGUE_ID = 1;
+  private isRunning = false;  // ← Add this
 
   constructor(
     private readonly sportsApi: SportsApiClient,
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   /**
    * Runs every 6 hours.
@@ -217,7 +218,11 @@ export class PullFixturesScheduler {
   @Cron('0 */6 * * *')
   async syncFixtures(): Promise<void> {
     this.logger.log('Starting Premier League fixture sync');
-
+    if (this.isRunning) {
+      this.logger.warn('Sync already in progress, skipping');
+      return;
+    }
+    this.isRunning = true;
     try {
       const dateFrom = new Date().toISOString().slice(0, 10);
       const dateTo = new Date(
@@ -258,6 +263,8 @@ export class PullFixturesScheduler {
         `Premier League fixture sync complete: ${total} events processed`,
       );
     } catch (error) {
+            this.isRunning = false;
+
       // Catch errors so the cron job doesn't crash the entire server
       this.logger.error(
         'Failed to sync fixtures from Bzzoiro',
