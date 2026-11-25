@@ -65,9 +65,14 @@ async create(
   }
 
   @Post('join')
-  @UsePipes(new ZodValidationPipe(joinLeagueSchema))
+  // @UsePipes(new ZodValidationPipe(joinLeagueSchema))
   @ApiOperation({ summary: 'Join a league via invite code' })
-  async join(@CurrentUser() user: AuthUser, @Body() dto: JoinLeagueDto) {
+  async join(
+    @CurrentUser() user: AuthUser, 
+     //@Body() dto: JoinLeagueDto
+  @Body(new ZodValidationPipe(joinLeagueSchema)) dto: JoinLeagueDto,
+  
+) {
     return this.joinLeague.execute(user.id, dto.inviteCode);
   }
 
