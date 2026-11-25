@@ -21,9 +21,13 @@ export class LeaguesController {
   ) {}
 
   @Post()
-  @UsePipes(new ZodValidationPipe(createLeagueSchema))
+  // @UsePipes(new ZodValidationPipe(createLeagueSchema))
   @ApiOperation({ summary: 'Create a private league' })
-  async create(@CurrentUser() user: AuthUser, @Body() dto: CreateLeagueDto) {
+  async create(@CurrentUser() user: AuthUser,
+  //  @Body() dto: CreateLeagueDto
+      @Body(new ZodValidationPipe(createLeagueSchema)) dto: CreateLeagueDto,
+  
+  ) {
     return this.createLeague.execute(user.id, dto);
   }
 
