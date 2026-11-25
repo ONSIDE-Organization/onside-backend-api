@@ -20,16 +20,40 @@ export class LeaguesController {
     private readonly getLeaderboard: GetLeaderboardUseCase,
   ) {}
 
-  @Post()
-  // @UsePipes(new ZodValidationPipe(createLeagueSchema))
-  @ApiOperation({ summary: 'Create a private league' })
-  async create(@CurrentUser() user: AuthUser,
-  //  @Body() dto: CreateLeagueDto
-      @Body(new ZodValidationPipe(createLeagueSchema)) dto: CreateLeagueDto,
+  // @Post()
+  // // @UsePipes(new ZodValidationPipe(createLeagueSchema))
+  // @ApiOperation({ summary: 'Create a private league' })
+  // async create(@CurrentUser() user: AuthUser,
+  // //  @Body() dto: CreateLeagueDto
+  //     @Body(new ZodValidationPipe(createLeagueSchema)) dto: CreateLeagueDto,
   
-  ) {
-    return this.createLeague.execute(user.id, dto);
-  }
+  // ) {
+  //   return this.createLeague.execute(user.id, dto);
+  // }
+
+  @Post()
+@ApiOperation({ summary: 'Create a private league' })
+@ApiBody({
+  schema: {
+    type: 'object',
+    required: ['name'],
+    properties: {
+      name: {
+        type: 'string',
+        example: 'My Private League',
+        minLength: 3,
+        maxLength: 50,
+      },
+    },
+  },
+})
+@UsePipes(new ZodValidationPipe(createLeagueSchema))
+async create(
+  @CurrentUser() user: AuthUser,
+  @Body() dto: CreateLeagueDto,
+) {
+  return this.createLeague.execute(user.id, dto);
+}
 
   @Get('me')
   @ApiOperation({ summary: 'Get all leagues I belong to' })
