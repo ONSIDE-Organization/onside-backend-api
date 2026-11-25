@@ -1,6 +1,6 @@
 // // src/modules/leagues/api/leagues.controller.ts
 import { Body, Controller, Get, Param, Post, Query, ParseUUIDPipe, UsePipes } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { AuthUser } from '../../../common/decorators/current-user.decorator';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe';
@@ -67,10 +67,19 @@ async create(
   @Post('join')
   // @UsePipes(new ZodValidationPipe(joinLeagueSchema))
   @ApiOperation({ summary: 'Join a league via invite code' })
-   @ApiProperty({
-    example: 'ABC123',
-    description: 'League invitation code',
-  })
+  @ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      inviteCode: {
+        type: 'string',
+        example: 'ABC123',
+        description: 'League invitation code',
+      },
+    },
+    required: ['inviteCode'],
+  },
+})
   async join(
     @CurrentUser() user: AuthUser, 
      //@Body() dto: JoinLeagueDto
