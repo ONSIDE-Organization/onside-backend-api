@@ -29,7 +29,7 @@ export class RivalriesController {
   }
 
   @Post()
-  @UsePipes(new ZodValidationPipe(createRivalrySchema))
+  // @UsePipes(new ZodValidationPipe(createRivalrySchema))
   @ApiOperation({ summary: 'Create a new rivalry' })
   @ApiBody({
     schema: {
@@ -45,7 +45,9 @@ export class RivalriesController {
   })
   async createNewRivalry(
     @CurrentUser() user: AuthUser,
-    @Body() dto: CreateRivalryDto,
+    // @Body() dto: CreateRivalryDto,
+  @Body(new ZodValidationPipe(createRivalrySchema)) dto: CreateRivalryDto,
+
   ) {
     return this.createRivalry.execute(user.id, dto);
   }
