@@ -47,10 +47,12 @@ export class LeaguesController {
     },
   },
 })
-@UsePipes(new ZodValidationPipe(createLeagueSchema))
+// @UsePipes(new ZodValidationPipe(createLeagueSchema))
 async create(
   @CurrentUser() user: AuthUser,
-  @Body() dto: CreateLeagueDto,
+  //@Body() dto: CreateLeagueDto,
+  @Body(new ZodValidationPipe(createLeagueSchema)) dto: CreateLeagueDto,
+  
 ) {
   return this.createLeague.execute(user.id, dto);
 }
