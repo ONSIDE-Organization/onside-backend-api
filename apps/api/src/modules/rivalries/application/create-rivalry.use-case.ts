@@ -4,7 +4,7 @@ import { CreateRivalryDto } from '../api/dto/create-rivalry.dto';
 
 @Injectable()
 export class CreateRivalryUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async execute(creatorId: string, dto: CreateRivalryDto) {
     // 1. Validate opponent exists
@@ -18,7 +18,7 @@ export class CreateRivalryUseCase {
 
     // 2. Handle Prediction (Either use existing or create a new one)
     let predictionId = dto.predictionId;
-    
+
     if (!predictionId) {
       // Custom statement flow (Rivalry-first)
       // Find or create a placeholder matchweek for "Custom" rivalries (or use current)
@@ -26,7 +26,7 @@ export class CreateRivalryUseCase {
         where: { status: 'UPCOMING' },
         orderBy: { weekNumber: 'asc' },
       });
-      
+
       if (!currentMatchweek) {
         throw new BadRequestException({ status: 400, code: 'NO_ACTIVE_MATCHWEEK', message: 'No active matchweek to attach rivalry' });
       }
@@ -42,6 +42,20 @@ export class CreateRivalryUseCase {
         },
       });
       predictionId = newPrediction.id;
+    }
+
+
+    // Validate that the prediction exists
+    const prediction = await this.prisma.prediction.findUnique({
+      where: { id: predictionId },
+    });
+
+    if (!prediction) {
+      throw new NotFoundException({
+        status: 404,
+        code: 'PREDICTION_NOT_FOUND',
+        message: 'The prediction you are trying to challenge does not exist.',
+      });
     }
 
     // 3. Create the Rivalry
